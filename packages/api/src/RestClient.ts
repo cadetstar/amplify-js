@@ -217,6 +217,11 @@ export class RestClient {
                 } else {
                     this._service = 'execute-api';
                 }
+                if (typeof v.endpointHost === 'string') {
+                  this._executionHost = v.executionHost
+                } else {
+                  this._executionHost = null;
+                }
                 if (typeof v.custom_header === 'function') {
                     this._custom_header = v.custom_header;
                 } else {
@@ -258,6 +263,10 @@ export class RestClient {
         logger.debug('Signed Request: ', signed_params);
 
         delete signed_params.headers['host'];
+
+        if (this._executionHost) {
+          signed_params.url = signed_params.url.replace(/\/\/[^\/]*/, this._executionHost);
+        }
 
         return axios(signed_params)
             .then(response => isAllResponse ? response : response.data)
